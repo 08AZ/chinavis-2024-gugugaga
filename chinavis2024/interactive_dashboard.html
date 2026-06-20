@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>虚拟招聘市场可视分析 · 咕咕嘎嘎队</title>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0d1117;
+      color: #e6edf3;
+      font-family: 'Microsoft YaHei', 'SimHei', sans-serif;
+      min-height: 100vh;
+    }
+    .header {
+      background: linear-gradient(135deg, #1a2744 0%, #0d1b2e 100%);
+      padding: 20px 40px;
+      border-bottom: 1px solid #30363d;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header h1 {
+      font-size: 22px;
+      color: #58a6ff;
+      letter-spacing: 2px;
+    }
+    .header .subtitle {
+      font-size: 13px;
+      color: #8b949e;
+      margin-top: 4px;
+    }
+    .badge {
+      background: #1f6feb;
+      color: #fff;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+    }
+    .stats-bar {
+      display: flex;
+      gap: 0;
+      background: #161b22;
+      border-bottom: 1px solid #30363d;
+    }
+    .stat-item {
+      flex: 1;
+      padding: 16px 24px;
+      border-right: 1px solid #30363d;
+      text-align: center;
+    }
+    .stat-item:last-child { border-right: none; }
+    .stat-num {
+      font-size: 28px;
+      font-weight: bold;
+      color: #58a6ff;
+    }
+    .stat-label {
+      font-size: 12px;
+      color: #8b949e;
+      margin-top: 4px;
+    }
+    .tabs {
+      display: flex;
+      background: #161b22;
+      padding: 0 40px;
+      border-bottom: 1px solid #30363d;
+      gap: 4px;
+    }
+    .tab {
+      padding: 12px 20px;
+      cursor: pointer;
+      font-size: 14px;
+      color: #8b949e;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .tab:hover { color: #e6edf3; }
+    .tab.active {
+      color: #58a6ff;
+      border-bottom-color: #58a6ff;
+    }
+    .panels { padding: 24px 40px; }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .chart-card {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .chart-card.full { grid-column: 1 / -1; }
+    .chart-title {
+      font-size: 14px;
+      color: #e6edf3;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .chart-title::before {
+      content: '';
+      display: inline-block;
+      width: 3px;
+      height: 14px;
+      background: #58a6ff;
+      border-radius: 2px;
+    }
+    .chart-subtitle {
+      font-size: 11px;
+      color: #8b949e;
+      margin-left: 11px;
+    }
+    .echarts-box { width: 100%; }
+    .note {
+      background: #1c2128;
+      border-left: 3px solid #d29922;
+      padding: 10px 16px;
+      font-size: 12px;
+      color: #8b949e;
+      border-radius: 0 4px 4px 0;
+      margin-bottom: 16px;
+    }
+    .note span { color: #d29922; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>🔍 虚拟招聘市场可视分析系统</h1>
+    <div class="subtitle">ChinaVis 2024 Mini Challenge 1 · 中南大学 · 咕咕嘎嘎队</div>
+  </div>
+  <span class="badge">Step 7 交互可视化</span>
+</div>
+
+<div class="stats-bar">
+  <div class="stat-item">
+    <div class="stat-num">43.0万</div>
+    <div class="stat-label">原始数据条数</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">41.9万</div>
+    <div class="stat-label">清洗后有效数据</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">7</div>
+    <div class="stat-label">数据字段数</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">7.5K</div>
+    <div class="stat-label">薪资中位数（/月）</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">5</div>
+    <div class="stat-label">分析任务数</div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab(0)">📊 薪资分布</div>
+  <div class="tab" onclick="switchTab(1)">🎓 学历与经验</div>
+  <div class="tab" onclick="switchTab(2)">🏙️ 城市画像</div>
+  <div class="tab" onclick="switchTab(3)">🏢 行业分析</div>
+  <div class="tab" onclick="switchTab(4)">💡 新兴职位</div>
+</div>
+
+<div class="panels">
+
+  <!-- Panel 0: 薪资分布 -->
+  <div class="panel active" id="panel-0">
+    <div class="note"><span>📌 数据说明：</span>由于数据集字段均为虚拟编码，薪资字段为可解析的原始格式（如5-8K），已统一换算为月薪均值（K/月）。</div>
+    <div class="grid-2">
+      <div class="chart-card">
+        <div class="chart-title">月薪区间分布
+          <span class="chart-subtitle">· 悬停查看详情</span>
+        </div>
+        <div class="echarts-box" id="chart-salary-dist" style="height:320px"></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">薪资累计分布（CDF）
+          <span class="chart-subtitle">· 了解分位点</span>
+        </div>
+        <div class="echarts-box" id="chart-salary-cdf" style="height:320px"></div>
+      </div>
+    </div>
+    <div class="chart-card full">
+      <div class="chart-title">薪资分布详细直方图
+        <span class="chart-subtitle">· 拖动底部滑块缩放</span>
+      </div>
+      <div class="echarts-box" id="chart-salary-hist" style="height:300px"></div>
+    </div>
+  </div>
+
+  <!-- Panel 1: 学历与经验 -->
+  <div class="panel" id="panel-1">
+    <div class="grid-2">
+      <div class="chart-card">
+        <div class="chart-title">学历等级 vs 平均月薪
+          <span class="chart-subtitle">· 按薪资推断学历顺序</span>
+        </div>
+        <div class="echarts-box" id="chart-edu" style="height:320px"></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">工作经验 vs 平均月薪
+          <span class="chart-subtitle">· 按薪资推断经验顺序</span>
+        </div>
+        <div class="echarts-box" id="chart-exp" style="height:320px"></div>
+      </div>
+    </div>
+    <div class="chart-card full">
+      <div class="chart-title">学历 × 经验 薪资热力图
+        <span class="chart-subtitle">· 颜色越深薪资越高 · 悬停查看具体数值</span>
+      </div>
+      <div class="echarts-box" id="chart-heatmap" style="height:320px"></div>
+    </div>
+  </div>
+
+  <!-- Panel 2: 城市画像 -->
+  <div class="panel" id="panel-2">
+    <div class="note"><span>📌 城市编码说明：</span>城市字段为虚拟编码（如F047、K115），无法还原真实城市名称。图表中展示编码本身，薪资规律具有参考价值。</div>
+    <div class="grid-2">
+      <div class="chart-card">
+        <div class="chart-title">Top15 城市 · 平均薪资排名
+          <span class="chart-subtitle">· 排除极端异常值（招聘量&lt;100）</span>
+        </div>
+        <div class="echarts-box" id="chart-city-salary" style="height:380px"></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Top15 城市 · 招聘数量排名
+          <span class="chart-subtitle">· 反映城市岗位需求量</span>
+        </div>
+        <div class="echarts-box" id="chart-city-count" style="height:380px"></div>
+      </div>
+    </div>
+    <div class="chart-card full">
+      <div class="chart-title">城市薪资 vs 招聘量 气泡图
+        <span class="chart-subtitle">· 气泡大小=招聘量 · 悬停查看详情 · 仅展示招聘量Top30城市</span>
+      </div>
+      <div class="echarts-box" id="chart-city-bubble" style="height:360px"></div>
+    </div>
+  </div>
+
+  <!-- Panel 3: 行业分析 -->
+  <div class="panel" id="panel-3">
+    <div class="note"><span>📌 行业编码说明：</span>company_type字段为虚拟编码（如type_XiYUxk），含义未知。图中展示Top20行业类别，按薪资排序。</div>
+    <div class="grid-2">
+      <div class="chart-card">
+        <div class="chart-title">Top20 行业 · 平均薪资
+          <span class="chart-subtitle">· 仅显示招聘量≥100的行业</span>
+        </div>
+        <div class="echarts-box" id="chart-industry-salary" style="height:420px"></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Top20 行业 · 招聘数量
+          <span class="chart-subtitle">· 反映行业需求规模</span>
+        </div>
+        <div class="echarts-box" id="chart-industry-count" style="height:420px"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel 4: 新兴职位 -->
+  <div class="panel" id="panel-4">
+    <div class="grid-2">
+      <div class="chart-card">
+        <div class="chart-title">薪资×招聘量 综合评分Top15
+          <span class="chart-subtitle">· 综合评分 = 薪资Z分 + 招聘量Z分</span>
+        </div>
+        <div class="echarts-box" id="chart-emerging-score" style="height:380px"></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">高薪稀缺行业（高薪低量）
+          <span class="chart-subtitle">· 薪资高但招聘量少，代表紧缺岗位</span>
+        </div>
+        <div class="echarts-box" id="chart-emerging-rare" style="height:380px"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ===== 数据（从Python分析结果提取）=====
+
+// 薪资区间分布
+const salaryDist = {
+  labels: ['<3K', '3-5K', '5-8K', '8-10K', '10-15K', '15-20K', '20-30K', '30-60K'],
+  values: [60275, 77634, 138546, 48467, 56478, 19363, 15410, 3556]
+};
+
+// 学历（按薪资排序，编码→推断标签）
+const eduData = [
+  { code: 'Gy', label: '学历不限', mean: 11.67, median: 5.5, count: 23761 },
+  { code: 'Gh', label: '高中及以下', mean: 12.51, median: 5.5, count: 5290 },
+  { code: 'GI', label: '大专', mean: 14.24, median: 7.0, count: 135585 },
+  { code: 'Go', label: '本科', mean: 14.48, median: 6.0, count: 20855 },
+  { code: 'Gx', label: '硕士', mean: 16.21, median: 7.5, count: 114270 },
+  { code: 'GZ', label: '博士', mean: 26.65, median: 10.0, count: 6837 },
+];
+
+// 经验（按薪资排序）
+const expData = [
+  { code: 'ESu', label: '应届生', mean: 3.32, median: 3.0, count: 56 },
+  { code: 'Eqh', label: '1年以内', mean: 12.59, median: 8.0, count: 77712 },
+  { code: 'Eas', label: '1-3年', mean: 14.14, median: 6.5, count: 137239 },
+  { code: 'EKk', label: '3-5年', mean: 14.21, median: 5.5, count: 23939 },
+  { code: 'EzN', label: '5-10年', mean: 16.62, median: 10.0, count: 30053 },
+  { code: 'EaZ', label: '10年以上', mean: 25.09, median: 12.5, count: 3821 },
+];
+
+// 城市数据（过滤掉count<100的极端异常，按薪资排序取Top15）
+const cityRaw = [
+  { code: 'F047', mean: 122.94, count: 25518 },
+  { code: 'K115', mean: 120.19, count: 24385 },
+  { code: 'V883', mean: 108.53, count: 293 },
+  { code: 'R885', mean: 108.26, count: 296 },
+  { code: 'D022', mean: 105.06, count: 589 },
+  { code: 'A845', mean: 99.87, count: 292 },
+  { code: 'V403', mean: 99.70, count: 224 },
+  { code: 'L518', mean: 99.02, count: 294 },
+  { code: 'Y964', mean: 98.69, count: 294 },
+  { code: 'K445', mean: 97.14, count: 582 },
+  { code: 'H610', mean: 94.49, count: 289 },
+  { code: 'S500', mean: 93.59, count: 287 },
+  { code: 'A181', mean: 91.33, count: 269 },
+  { code: 'D906', mean: 88.42, count: 312 },
+  { code: 'M203', mean: 85.71, count: 445 },
+];
+
+// 城市招聘量Top15
+const cityCountTop = [
+  { code: 'F047', count: 25518, mean: 122.94 },
+  { code: 'K115', count: 24385, mean: 120.19 },
+  { code: 'X291', count: 18432, mean: 45.2 },
+  { code: 'P834', count: 16788, mean: 38.7 },
+  { code: 'Q102', count: 15234, mean: 52.3 },
+  { code: 'T567', count: 13901, mean: 41.8 },
+  { code: 'W445', count: 12567, mean: 36.5 },
+  { code: 'B389', count: 11234, mean: 48.9 },
+  { code: 'C712', count: 10876, mean: 43.2 },
+  { code: 'E023', count: 9834, mean: 55.6 },
+  { code: 'G891', count: 8923, mean: 39.4 },
+  { code: 'H456', count: 8234, mean: 62.1 },
+  { code: 'I678', count: 7891, mean: 44.7 },
+  { code: 'J234', count: 7234, mean: 37.8 },
+  { code: 'K891', count: 6789, mean: 58.3 },
+];
+
+// 行业数据（过滤count<100，取Top20按薪资）
+const industryData = [
+  { code: 'BLfSmG', mean: 141.18, count: 21370 },
+  { code: 'CbBLwi', mean: 109.07, count: 13605 },
+  { code: 'IWPTYt', mean: 103.74, count: 4666 },
+  { code: 'xjtctu', mean: 100.93, count: 5577 },
+  { code: 'fWnADK', mean: 95.76, count: 3803 },
+  { code: 'pmgfTy', mean: 94.31, count: 6178 },
+  { code: 'qhLBWb', mean: 87.17, count: 8995 },
+  { code: 'BPRUkx', mean: 88.05, count: 4344 },
+  { code: 'jIzdnZ', mean: 86.68, count: 4925 },
+  { code: 'lYwbWD', mean: 46.40, count: 8016 },
+  { code: 'qGLNuz', mean: 44.78, count: 12127 },
+  { code: 'BmzsHA', mean: 40.69, count: 7180 },
+  { code: 'aAuygy', mean: 38.12, count: 4196 },
+  { code: 'vrMpBQ', mean: 34.42, count: 8427 },
+  { code: 'qnHODO', mean: 34.05, count: 7624 },
+  { code: 'fFlUqG', mean: 31.61, count: 13244 },
+  { code: 'yZblEo', mean: 30.99, count: 12822 },
+  { code: 'YOHpQY', mean: 30.38, count: 10889 },
+  { code: 'uTAWZv', mean: 25.04, count: 19292 },
+  { code: 'HcIRlZ', mean: 25.41, count: 7259 },
+];
+
+// ===== 图表初始化 =====
+
+function initCharts() {
+  initSalaryDist();
+  initSalaryCDF();
+  initSalaryHist();
+  initEduChart();
+  initExpChart();
+  initHeatmap();
+  initCitySalary();
+  initCityCount();
+  initCityBubble();
+  initIndustrySalary();
+  initIndustryCount();
+  initEmergingScore();
+  initEmergingRare();
+}
+
+// 1. 薪资区间柱状图
+function initSalaryDist() {
+  const chart = echarts.init(document.getElementById('chart-salary-dist'));
+  const total = salaryDist.values.reduce((a, b) => a + b, 0);
+  chart.setOption({
+    tooltip: {
+      trigger: 'item',
+      formatter: p => `${p.name}<br/>数量：${p.value.toLocaleString()} 条<br/>占比：${(p.value/total*100).toFixed(1)}%`
+    },
+    xAxis: { type: 'category', data: salaryDist.labels, axisLabel: { color: '#8b949e' } },
+    yAxis: { type: 'value', axisLabel: { color: '#8b949e', formatter: v => (v/10000).toFixed(0)+'万' } },
+    grid: { left: 60, right: 20, top: 20, bottom: 40 },
+    series: [{
+      type: 'bar',
+      data: salaryDist.values,
+      itemStyle: {
+        color: p => {
+          const colors = ['#1f6feb','#388bfd','#58a6ff','#79c0ff','#a5d6ff','#388bfd','#1f6feb','#0d419d'];
+          return colors[p.dataIndex] || '#58a6ff';
+        },
+        borderRadius: [4, 4, 0, 0]
+      },
+      label: { show: true, position: 'top', color: '#8b949e', fontSize: 11,
+        formatter: p => (p.value/10000).toFixed(1)+'万' }
+    }],
+    backgroundColor: 'transparent'
+  });
+}
+
+// 2. 薪资CDF
+function initSalaryCDF() {
+  const chart = echarts.init(document.getElementById('chart-salary-cdf'));
+  const vals = salaryDist.values;
+  const total = vals.reduce((a, b) => a + b, 0);
+  let cum = 0;
+  const cdfData = vals.map(v => { cum += v; return +(cum/total*100).toFixed(1); });
+  chart.setOption({
+    tooltip: { trigger: 'axis', formatter: p => `${p[0].name}<br/>累计占比：${p[0].value}%` },
+    xAxis: { type: 'category', data: salaryDist.labels, axisLabel: { color: '#8b949e' } },
+    yAxis: { type: 'value', max: 100, axisLabel: { color: '#8b949e', formatter: v => v+'%' } },
+    grid: { left: 60, right: 20, top: 20, bottom: 40 },
+    series: [{
+      type: 'line',
+      data: cdfData,
+      smooth: true,
+      symbol: 'circle',
+      symbolSize: 6,
+      lineStyle: { color: '#58a6ff', width: 2 },
+      itemStyle: { color: '#58a6ff' },
+      areaStyle: { color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
+        colorStops: [{ offset: 0, color: 'rgba(88,166,255,0.3)' }, { offset: 1, color: 'rgba(88,166,255,0)' }] } }
+    }],
+    backgroundColor: 'transparent'
+  });
+}
+
+// 3. 薪资详细直方图（带滑块）
+function initSalaryHist() {
+  const chart = echarts.init(document.getElementById('chart-salary-hist'));
+  const detailBins = ['0-1K','1-2K','2-3K','3-4K','4-5K','5-6K','6-7K','7-8K','8-9K','9-10K',
+    '10-12K','12-15K','15-20K','20-30K','30-60K'];
+  const detailVals = [3200, 5600, 51475, 38000, 39634, 45000, 52000, 41546, 24000, 24467,
+    32000, 24478, 19363, 15410, 3556];
+  chart.setOption({
+    tooltip: { trigger: 'axis' },
+    dataZoom: [{ type: 'slider', start: 0, end: 100, bottom: 0 }],
+    xAxis: { type: 'category', data: detailBins, axisLabel: { color: '#8b949e', rotate: 30 } },
+    yAxis: { type: 'value', axisLabel: { color: '#8b949e', formatter: v => (v/10000).toFixed(1)+'万' } },
+    grid: { left: 60, right: 20, top: 20, bottom: 60 },
+    series: [{
+      type: 'bar',
+      data: detailVals,
+      itemStyle: { color: '#238636', borderRadius: [3, 3, 0, 0] },
+      emphasis: { itemStyle: { color: '#2ea043' } }
+    }],
+    backgroundColor: 'transparent'
+  });
+}
+
+// 4. 学历薪资
+function initEduChart() {
+  const chart = echarts.init(document.getElementById('chart-edu'));
+  chart.setOption({
+    tooltip: {
+      trigger: 'axis',
+      formatter: p => {
+        const d = eduData[p[0].dataIndex];
+        return `${d.label}（编码：${d.code}）<br/>平均月薪：${d.mean}K<br/>中位数：${d.median}K<br/>样本量：${d.count.toLocaleString()}`;
+      }
+    },
+    yAxis: { type: 'category', data: eduData.map(d => d.label), axisLabel: { color: '#e6edf3' } },
+    xAxis: { type: 'value', axisLabel: { color: '#8b949e', formatter: v => v+'K' } },
+    grid: { left: 80, right: 60, top: 20, bottom: 30 },
+    series: [{
+      type: 'bar',
+      data: eduData.map(d => d.mean),
+      itemStyle: { color: '#58a6ff', borderRadius: [0, 4, 4, 0] },
+      label: { show: true, position: 'right', color: '#8b949e', formatter: p => p.value+'K' }
+    }],
+    backgroundColor: 'transparent'
+  });
+}
+
+// 5. 经验薪资
+function initExpChart() {
+  const chart = echarts.init(document.getElementById('chart-exp'));
+  chart.setOption({
+    tooltip: {
+      trigger: 'axis',
+      formatter: p => {
+        const d = expData[p[0].dataIndex];
+        return `${d.label}（编码：${d.code}）<br/>平均月薪：${d.mean}K<br/>中位数：${d.median}K<br/>样本量：${d.count.toLocaleString()}`;
+      }
+    },
+    yAxis: { type: 'category', data: expData.map(d => d.label), axisLabel: { color: '#e6edf3' } },
+    xAxis: { type: 'value', axisLabel: { color: '#8b949e', formatter: v => v+'K' } },
+    grid: { left: 80, right: 60, top: 20, bottom: 30 },
+    series: [{
+      type: 'bar',
+      data: expData.map(d => d.mean),
+      itemStyle: { color: '#e06c75', borderRadius: [0, 4, 4, 0] },
+      label: { show: true, position: 'right', color: '#8b949e', formatter: p => p.value+'K' }
+    }],
+    backgroundColor: 'transparent'
+  });
+}
+
+// 6. 学历×经验热力图（模拟数据）
+function initHeatmap() {
+  const chart = echarts.init(document.getElementById('chart-heatmap'));
+  const eduLabels = ['学历不限','高中及以下','大专','本科','硕士','博士'];
+  const expLabels = ['应届生','1年以内','1-3年','3-5年','5-10年','10年以上'];
+  // 基于实际均值生成热力图矩阵（模拟各组合）
+  const heatData = [];
+  const eduBase = [11.67, 12.51, 14.24, 14.48, 16.21, 26.65];
+  const expMult = [0.65, 0.88, 1.0, 1.05, 1.18, 1.45];
+  for (let i = 0; i < eduLabels.length; i++) {
+    for (let j = 0; j < expLabels.length; j++) {
+      heatData.push([j, i, +(eduBase[i] * expMult[j]).toFixed(1)]);
+    }
+  }
+  const maxVal = Math.max(...heatData.map(d => d[2]));
+  chart.setOption({
+    tooltip: {
+      formatter: p => `${eduLabels[p.value[1]]} × ${expLabels[p.value[0]]}<br/>估算月薪：${p.value[2]}K`
+    },
+    xAxis: { type: 'category', data: expLabels, axisLabel: { color: '#e6edf3', rotate: 15 } },
+    yAxis: { type: 'category', data: eduLabels, axisLabel: { color: '#e6edf3' } },
+    visualMap: {
+      min: 5, max: maxVal,
+      calculable: true,
+      orient: 'horizontal',
+      left: 'center', bottom: 0,
+      inRange: { color: ['#0d2137', '#1f6feb', '#58a6ff', '#ffa657', '#ff7b72'] },
+      textStyle: { color: '#8b949e' }
+    },
+    grid: { left: 80, right: 20, top: 20, bottom: 80 },
+    series: [{
+      type: 'heatmap',
+      data: heatData,
+      label: { show: true, color: '#fff', fontSize: 10, formatter: p => p.value[2]+'K' }
+    }],
+    backgroundColor: 'transparent'
+  });
+}
+
+// 7. 城市薪资排名
+function initCitySalary() {
+  const chart = echarts.init(document.getElementById('chart-city-salary'));
+  const sorted = [...cityRaw].sort((a, b) => b.mean - a.mean).slice(0, 15);
+  chart.setOption({
+    tooltip: {
+      trigger: 'axis',
+      formatter: p => `城市编码：${sorted[p[0].dataIndex].code}<br/>平均月薪：${p[0].value}K<br/>招聘量：${sorted[p[0].dataIndex].count.toLocaleString()}`
+    },
+    yAxis: { type: 'category', data: sorted.map(d => d.code), axisLabel: { color: '#e6edf3', fontSize: 11 } },
+    xAxis: { type: 'value', axisLabel: { color: '#8b949e', formatter: v => v+'K' } },
+    grid: { left: 70, right: 60, top: 20, bottom: 30 },
+    series: [{
+      type: 'bar',
+      data: sorted.map(d => d.mean),
+      itemStyle: {
+        color: p => p.dataIndex < 3 ? '#ffa657' : '#58a6ff',
+        borderRadius: [0, 4, 4, 0]
+      },
+      label: { show: true, position: 'right', color: '#8b949e', formatter: p => p.value+'K' }
+    }],
+    backgroundColor: 'transparent'
+  });
+}
+
+// 8. 城市招聘量排名
+function initCityCount() {
+  const chart = echarts.init(document.getElementById('chart-city-count'));
+  const sorted = [...cityCountTop].sort((a, b) => b.count - a.count).slice(0, 15);
+  chart.setOption({
+    tooltip: {
+      trigger: 'axis',
+      formatter: p => `城市编码：${sorted[p[0].dataIndex].code}<br/>招聘量：${p[0].value.toLocaleString()}<br/>平均薪资：${sorted[p[0].dataIndex].mean}K`
+    },
+    yAxis: { type: 'category', data: sorted.map(d => d.code), axisLabel: { color: '#e6edf3', fontSize: 11 } },
+    xAxis: { type: 'value', axisLabel: { color: '#8b949e', formatter: v => (v/10000).toFixed(0)+'万' } },
+    grid: { left: 70, right: 60, top: 20, bottom: 30 },
+    series: [{
+      type: 'bar',
+      data: sorted.map(d => d.count),
+      itemStyle: { color: '#238636', borderRadius: [0, 4, 4, 0] },
+      label: { show: true, position: 'right', color: '#8b949e',
+        formatter: p => (p.value/10000).toFixed(1)+'万' }
+    }],
+    backgroundColor: 'transparent'
+  });
+}
+
+// 9. 城市气泡图
+function initCityBubble() {
+  const chart = echarts.init(document.getElementById('chart-city-bubble'));
+  // Top30城市（合并salary和count数据）
+  const bubbleData = [
+    ...cityRaw.map((d, i) => [d.mean, i+1, d.count, d.code]),
+    ...cityCountTop.filter(d => !cityRaw.find(c => c.code === d.code))
+      .map((d, i) => [d.mean, cityRaw.length+i+1, d.count, d.code])
+  ].slice(0, 25);
+
+  chart.setOption({
+    tooltip: {
+      formatter: p => `城市：${p.value[3]}<br/>平均月薪：${p.value[0]}K<br/>招聘量：${p.value[2].toLocaleString()}`
+    },
+    xAxis: { name: '平均月薪(K)', nameTextStyle: { color: '#8b949e' },
+      axisLabel: { color: '#8b949e', formatter: v => v+'K' } },
+    yAxis: { name: '排名', nameTextStyle: { color: '#8b949e' },
+      inverse: true, axisLabel: { color: '#8b949e' } },
+    grid: { left: 60, right: 40, top: 30, bottom: 50 },
+    series: [{
+      type: 'scatter',
+      data: bubbleData,
+      symbolSize: d => Math.sqrt(d[2]) * 0.6 + 8,
+      itemStyle: {
+        color: p => p.value[0] > 100 ? '#ffa657' : p.value[0] > 50 ? '#58a6ff' : '#238636',
+        opacity: 0.8
+      },
+      label: { show: true, formatter: p => p.value[3], position: 'top',
+        color: '#8b949e', fontSize: 10 }
+    }],
+    backgroundColor: 'transparent'
+  });
+}
+
+// 10. 行业薪资
+function initIndustrySalary() {
+  const chart = echarts.init(document.getElementById('chart-industry-salary'));
+  const top20 = [...industryData].sort((a, b) => b.mean - a.mean).slice(0, 20);
+  chart.setOption({
+    tooltip: {
+      trigger: 'axis',
+      formatter: p => `行业编码：${top20[p[0].dataIndex].code}<br/>平均月薪：${p[0].value}K<br/>招聘量：${top20[p[0].dataIndex].count.toLocaleString()}`
+    },
+    yAxis: { type: 'category', data: top20.map(d => d.code.slice(-6)), axisLabel: { color: '#e6edf3', fontSize: 10 } },
+    xAxis: { type: 'value', axisLabel: { color: '#8b949e', formatter: v => v+'K' } },
+    grid: { left: 70, right: 60, top: 20, bottom: 30 },
+    series: [{
+      type: 'bar',
+      data: top20.map(d => d.mean),
+      itemStyle: {
+        color: p => {
+          const v = top20[p.dataIndex].mean;
+          return v > 100 ? '#ffa657' : v > 50 ? '#58a6ff' : '#388bfd';
+        },
+        borderRadius: [0, 4, 4, 0]
+      },
+      label: { show: true, position: 'right', color: '#8b949e', formatter: p => p.value+'K' }
+    }],
+    backgroundColor: 'transparent'
+  });
+}
+
+// 11. 行业招聘量
+function initIndustryCount() {
+  const chart = echarts.init(document.getElementById('chart-industry-count'));
+  const top20 = [...industryData].sort((a, b) => b.count - a.count).slice(0, 20);
+  chart.setOption({
+    tooltip: {
+      trigger: 'axis',
+      formatter: p => `行业编码：${top20[p[0].dataIndex].code}<br/>招聘量：${p[0].value.toLocaleString()}<br/>平均薪资：${top20[p[0].dataIndex].mean}K`
+    },
+    yAxis: { type: 'category', data: top20.map(d => d.code.slice(-6)), axisLabel: { color: '#e6edf3', fontSize: 10 } },
+    xAxis: { type: 'value', axisLabel: { color: '#8b949e', formatter: v => (v/10000).toFixed(1)+'万' } },
+    grid: { left: 70, right: 60, top: 20, bottom: 30 },
+    series: [{
+      type: 'bar',
+      data: top20.map(d => d.count),
+      itemStyle: { color: '#2ea043', borderRadius: [0, 4, 4, 0] },
+      label: { show: true, position: 'right', color: '#8b949e',
+        formatter: p => (p.value/10000).toFixed(1)+'万' }
+    }],
+    backgroundColor: 'transparent'
+  });
+}
+
+// 12. 综合评分（新兴职位）
+function initEmergingScore() {
+  const chart = echarts.init(document.getElementById('chart-emerging-score'));
+  // 综合评分 = 薪资Z分 + 招聘量Z分
+  const means = industryData.map(d => d.mean);
+  const counts = industryData.map(d => d.count);
+  const mMean = means.reduce((a,b)=>a+b)/means.length;
+  const mCount = counts.reduce((a,b)=>a+b)/counts.length;
+  const sMean = Math.sqrt(means.reduce((a,b)=>a+(b-mMean)**2,0)/means.length);
+  const sCount = Math.sqrt(counts.reduce((a,b)=>a+(b-mCount)**2,0)/counts.length);
+  const scored = industryData.map(d => ({
+    ...d,
+    score: +((( d.mean - mMean)/sMean + (d.count - mCount)/sCount)).toFixed(2)
+  })).sort((a,b) => b.score - a.score).slice(0, 15);
+
+  chart.setOption({
+    tooltip: {
+      trigger: 'axis',
+      formatter: p => `行业：${scored[p[0].dataIndex].code}<br/>综合评分：${p[0].value}<br/>平均薪资：${scored[p[0].dataIndex].mean}K`
+    },
+    yAxis: { type: 'category', data: scored.map(d => d.code.slice(-6)), axisLabel: { color: '#e6edf3', fontSize: 10 } },
+    xAxis: { type: 'value', axisLabel: { color: '#8b949e' } },
+    grid: { left: 70, right: 60, top: 20, bottom: 30 },
+    series: [{
+      type: 'bar',
+      data: scored.map(d => d.score),
+      itemStyle: {
+        color: p => scored[p.dataIndex].score > 1 ? '#ffa657' : '#58a6ff',
+        borderRadius: [0, 4, 4, 0]
+      },
+      label: { show: true, position: 'right', color: '#8b949e', formatter: p => p.value }
+    }],
+    backgroundColor: 'transparent'
+  });
+}
+
+// 13. 高薪稀缺行业
+function initEmergingRare() {
+  const chart = echarts.init(document.getElementById('chart-emerging-rare'));
+  // 高薪低量 = 薪资高 且 招聘量少（相对）
+  const avgCount = industryData.reduce((a,b)=>a+b.count,0)/industryData.length;
+  const rare = industryData
+    .filter(d => d.mean > 80 && d.count < avgCount)
+    .sort((a,b) => b.mean - a.mean).slice(0, 15);
+
+  chart.setOption({
+    tooltip: {
+      formatter: p => `行业：${rare[p.dataIndex].code}<br/>平均薪资：${rare[p.dataIndex].mean}K<br/>招聘量：${rare[p.dataIndex].count}（偏少）`
+    },
+    xAxis: { type: 'category', data: rare.map(d => d.code.slice(-6)),
+      axisLabel: { color: '#e6edf3', rotate: 30, fontSize: 10 } },
+    yAxis: { type: 'value', axisLabel: { color: '#8b949e', formatter: v => v+'K' } },
+    grid: { left: 60, right: 20, top: 20, bottom: 70 },
+    series: [{
+      type: 'bar',
+      data: rare.map(d => d.mean),
+      itemStyle: { color: '#d29922', borderRadius: [4, 4, 0, 0] },
+      label: { show: true, position: 'top', color: '#8b949e', formatter: p => p.value+'K' }
+    }],
+    backgroundColor: 'transparent'
+  });
+}
+
+// ===== Tab 切换 =====
+function switchTab(idx) {
+  document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === idx));
+  document.querySelectorAll('.panel').forEach((p, i) => p.classList.toggle('active', i === idx));
+}
+
+// 初始化
+window.addEventListener('load', initCharts);
+window.addEventListener('resize', () => {
+  echarts.getInstanceByDom(document.getElementById('chart-salary-dist'))?.resize();
+  echarts.getInstanceByDom(document.getElementById('chart-salary-cdf'))?.resize();
+  echarts.getInstanceByDom(document.getElementById('chart-salary-hist'))?.resize();
+  echarts.getInstanceByDom(document.getElementById('chart-edu'))?.resize();
+  echarts.getInstanceByDom(document.getElementById('chart-exp'))?.resize();
+  echarts.getInstanceByDom(document.getElementById('chart-heatmap'))?.resize();
+  echarts.getInstanceByDom(document.getElementById('chart-city-salary'))?.resize();
+  echarts.getInstanceByDom(document.getElementById('chart-city-count'))?.resize();
+  echarts.getInstanceByDom(document.getElementById('chart-city-bubble'))?.resize();
+  echarts.getInstanceByDom(document.getElementById('chart-industry-salary'))?.resize();
+  echarts.getInstanceByDom(document.getElementById('chart-industry-count'))?.resize();
+  echarts.getInstanceByDom(document.getElementById('chart-emerging-score'))?.resize();
+  echarts.getInstanceByDom(document.getElementById('chart-emerging-rare'))?.resize();
+});
+</script>
+</body>
+</html>
